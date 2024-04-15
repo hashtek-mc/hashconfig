@@ -20,12 +20,15 @@ public class HashConfig
     private static HashConfig instance = null;
 
     private final Class<?> plugin;
+    private Object orm;
     private Dotenv env = null;
     private YamlFile yaml;
     private final String resourcePath;
     private final String outputPath;
 
     /**
+     * Create a new HashConfig instance.
+     *
      * @param resourcePath The ABSOLUTE path of the configuration file to load. !! WARNING !! The file must be present in the package (PluginName.jar).
      * @throws IOException If the plugin can't read the file
      */
@@ -36,18 +39,24 @@ public class HashConfig
         this.resourcePath = resourcePath;
         this.outputPath = outputPath;
         this.load(withDotEnv);
+        this.orm = this.loadOrm();
     }
 
 
     /**
+     * Reload the configuration file.
+     *
      * @throws IOException If the configuration failed to load.
      */
     public void reload() throws IOException
     {
+        this.orm = this.loadOrm();
         this.load(this.env != null);
     }
 
     /**
+     * Save the configuration file.
+     *
      * @throws IOException If the configuration has failed to save.
      */
     public void save() throws IOException
@@ -61,13 +70,13 @@ public class HashConfig
      * @return the entity loaded.
      * @throws IOException if the input stream failed to close.
      */
-    public Class<?> loadToEntity() throws IOException
+    private Object loadOrm() throws IOException
     {
         final Yaml yaml = new Yaml();
         final InputStream inputStream = this.plugin
             .getClassLoader()
             .getResourceAsStream(this.resourcePath);
-        final Class<?> entity;
+        final Object entity;
 
         if (inputStream == null)
             throw new NullPointerException("Cannot get resource \"" + this.resourcePath + "\" as stream.");
@@ -76,6 +85,12 @@ public class HashConfig
         return entity;
     }
 
+    /**
+     * Load the yaml configuration file.
+     *
+     * @param withDotEnv {@code true} if a .env file should be loaded, {@code false} otherwise.
+     * @throws IOException If the yaml file failed to load.
+     */
     private void load(boolean withDotEnv) throws IOException
     {
         File configFile = this.createFileIfNotExists();
@@ -163,6 +178,11 @@ public class HashConfig
     public Dotenv getEnv()
     {
         return this.env;
+    }
+
+    public Object getOrm()
+    {
+        return this.orm;
     }
 
 }
