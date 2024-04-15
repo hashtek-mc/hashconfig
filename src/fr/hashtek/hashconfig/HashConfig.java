@@ -3,6 +3,7 @@ package fr.hashtek.hashconfig;
 import fr.hashtek.hashconfig.exception.InstanceNotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.simpleyaml.configuration.file.YamlFile;
+import org.simpleyaml.configuration.implementation.snakeyaml.lib.Yaml;
 
 import java.io.IOException;
 import java.io.File;
@@ -23,7 +24,6 @@ public class HashConfig
     private YamlFile yaml;
     private final String resourcePath;
     private final String outputPath;
-
 
     /**
      * @param resourcePath The ABSOLUTE path of the configuration file to load. !! WARNING !! The file must be present in the package (PluginName.jar).
@@ -55,6 +55,26 @@ public class HashConfig
         this.yaml.save(this.outputPath);
     }
 
+    /**
+     * Load a yaml file to an entity object.
+     *
+     * @return the entity loaded.
+     * @throws IOException if the input stream failed to close.
+     */
+    public Class<?> loadToEntity() throws IOException
+    {
+        final Yaml yaml = new Yaml();
+        final InputStream inputStream = this.plugin
+            .getClassLoader()
+            .getResourceAsStream(this.resourcePath);
+        final Class<?> entity;
+
+        if (inputStream == null)
+            throw new NullPointerException("Cannot get resource \"" + this.resourcePath + "\" as stream.");
+        entity = yaml.load(inputStream);
+        inputStream.close();
+        return entity;
+    }
 
     private void load(boolean withDotEnv) throws IOException
     {
