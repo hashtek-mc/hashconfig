@@ -3,7 +3,6 @@ package fr.hashtek.hashconfig;
 import fr.hashtek.hashconfig.exception.InstanceNotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.simpleyaml.configuration.file.YamlFile;
-import org.simpleyaml.configuration.implementation.snakeyaml.lib.Yaml;
 
 import java.io.IOException;
 import java.io.File;
@@ -20,7 +19,6 @@ public class HashConfig
     private static HashConfig instance = null;
 
     private final Class<?> plugin;
-    private Object orm;
     private Dotenv env = null;
     private YamlFile yaml;
     private final String resourcePath;
@@ -39,9 +37,7 @@ public class HashConfig
         this.resourcePath = resourcePath;
         this.outputPath = outputPath;
         this.load(withDotEnv);
-        this.orm = this.loadOrm();
     }
-
 
     /**
      * Reload the configuration file.
@@ -50,7 +46,6 @@ public class HashConfig
      */
     public void reload() throws IOException
     {
-        this.orm = this.loadOrm();
         this.load(this.env != null);
     }
 
@@ -62,27 +57,6 @@ public class HashConfig
     public void save() throws IOException
     {
         this.yaml.save(this.outputPath);
-    }
-
-    /**
-     * Load a yaml file to an entity object.
-     *
-     * @return the entity loaded.
-     * @throws IOException if the input stream failed to close.
-     */
-    private Object loadOrm() throws IOException
-    {
-        final Yaml yaml = new Yaml();
-        final InputStream inputStream = this.plugin
-            .getClassLoader()
-            .getResourceAsStream(this.resourcePath);
-        final Object entity;
-
-        if (inputStream == null)
-            throw new NullPointerException("Cannot get resource \"" + this.resourcePath + "\" as stream.");
-        entity = yaml.load(inputStream);
-        inputStream.close();
-        return entity;
     }
 
     /**
@@ -150,7 +124,6 @@ public class HashConfig
         reader.close();
     }
 
-
     /**
      * @throws InstanceNotFoundException If there is no instance available.
      * @return The last instance created. !! WARNING !! If you create multiple instance of
@@ -178,11 +151,6 @@ public class HashConfig
     public Dotenv getEnv()
     {
         return this.env;
-    }
-
-    public Object getOrm()
-    {
-        return this.orm;
     }
 
 }
