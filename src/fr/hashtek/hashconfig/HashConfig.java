@@ -109,7 +109,6 @@ public class HashConfig
             line = reader.readLine();
 
             if (line != null) {
-                System.out.println("Writing line: '" + line + "'.");
                 writerBuffer.write(line);
                 writerBuffer.newLine();
             }
