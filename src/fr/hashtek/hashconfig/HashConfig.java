@@ -1,6 +1,5 @@
 package fr.hashtek.hashconfig;
 
-import fr.hashtek.hashconfig.exception.InstanceNotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.simpleyaml.configuration.file.YamlFile;
 
@@ -16,8 +15,6 @@ import java.io.InputStreamReader;
 public class HashConfig
 {
 
-    private static HashConfig instance = null;
-
     private final Class<?> plugin;
     private Dotenv env = null;
     private YamlFile yaml;
@@ -32,7 +29,6 @@ public class HashConfig
      */
     public HashConfig(Class<?> plugin, String resourcePath, String outputPath, boolean withDotEnv) throws IOException
     {
-        HashConfig.instance = this;
         this.plugin = plugin;
         this.resourcePath = resourcePath;
         this.outputPath = outputPath;
@@ -122,18 +118,6 @@ public class HashConfig
         writerBuffer.close();
         writer.close();
         reader.close();
-    }
-
-    /**
-     * @throws InstanceNotFoundException If there is no instance available.
-     * @return The last instance created. !! WARNING !! If you create multiple instance of
-     *           ConfigManager, then it returns only the last instance created.
-     */
-    public static HashConfig getInstance() throws InstanceNotFoundException
-    {
-        if (instance == null)
-            throw new InstanceNotFoundException("The instance cannot be found.");
-        return instance;
     }
 
     /**
