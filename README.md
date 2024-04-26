@@ -1,50 +1,46 @@
 # `⚙️ HashConfig v0.0.1 - Guide d'utilisation`
 
 ## Description de la librairie
-Cette librairie est faîte pour manipuler des fichiers de configuration ainsi que des .env plus facilement.
+Cette librairie est faîte pour manipuler des fichiers de configuration ainsi que des `.env` plus facilement.
 
 ---
 
-## `HashConfig`
+## 🏁 Getting Started
 
-### Prototype
+### Classe
 ```java
 HashConfig(Class<?> plugin, String resourcePath, String outputPath, boolean withDotEnv);
 ```
 
-### Description
-Classe principale permettant de charger et manipuler un fichier de configuration facilement.
-
 ### Paramètres
-`Class<?> plugin`: La classe principale du plugin.
-`String resourcePath`: Le chemin du fichier de configuration se trouvant dans votre `.jar`. *(Appelé ressource)*
-`String outputPath`: Le chemin vers la sauvegarde locale du fichier de configuration.
-`boolean withDotEnv`: Si il faut charger le fichier d'environnement ou non.
+- `Class<?> plugin`: La classe principale du plugin.
+- `String resourcePath`: Le chemin du fichier de configuration se trouvant dans votre `.jar`. *(Appelé ressource)*
+- `String outputPath`: Le chemin vers la sauvegarde locale du fichier de configuration.
+- `boolean withDotEnv`: S'il faut charger le fichier d'environnement ou non.
 
-- `⚠️` **Le fichier de configuration ne sera pas chargé/recréé depuis les ressources si il existe déjà en local. Il sera uniquement chargé depuis le fichier local.**
+> [!warning]
+> **Le fichier de configuration ne sera pas chargé/recréé depuis les ressources si il existe déjà en local. Il sera uniquement chargé depuis le fichier local.**
 
----
 
-## `Exemple`
-
-### Fichiers utilisés pour les exemples qui suivent
+### Utilisation
 
 **Structure du serveur**
 ```
 server/
 ├─ ...
+├─ spigot.jar
 ├─ plugins/
 │  ├─ TonPlugin.jar
 ├─ ...
 ```
 
-**Structure du .jar**
+**Structure de `TonPlugin.jar`**
 ```
 TonPlugin.jar/
-├─ fr/
-│  ├─ .../
-├─ configuration_file/
-│  ├─ config.yml
+├─ config.yml
+├─ main/
+│  ├─ java/
+│  │  ├─ .../
 ```
 
 **Fichier de configuration: `config.yml`:**
@@ -67,53 +63,97 @@ TOKEN=YOUR_TOKEN
 
 ### Codes d'exemple
 
-**Modifier / Accéder aux valeurs du fichier de configuration:**
+**Chargement basic du fichier de configuration**
 ```java
-// `this` doit être l'instance de la classe principale de votre plugin.
-HashConfig config = new HashConfig(this.getClass(), "configuration_file/config.yml", "plugins/TonPlugin/config.yml", false);
+import fr.hashtek.hashconfig.HashConfig;
+
+// Pour un plugin minecraft
+public class TonPlugin extends JavaPlugin
+{
+    
+    @Override
+    public void onEnable()
+    {
+        HashConfig config = new HashConfig(
+            this.getClass(),
+            "config.yml",
+            this.getDataFolder().getPath() + "/" + "config.yml",
+            false // Définir à true pour charger les fichiers .env
+        );
+    }
+
+    @Override
+    public void onDisable() {}
+    
+}
+
+// Pour un autre type de projet Java
+public class TonProjet
+{
+    
+    public static void main(String[] args)
+    {
+        HashConfig config = new HashConfig(
+            this.getClass(),
+            "config.yml",
+            "chemin/de/destination/config.yml",
+            false // Définir à true pour charger les fichiers .env
+        );
+    }
+    
+}
+```
+
+**Récupération des variables d'environnement**
+
+```java
+import fr.hashtek.hashconfig.HashConfig;
+
+HashConfig config = ...;
+String value = config.getEnv().get("key");
+```
+
+**Récupération d'un élément de votre fichier de configuration**
+```java
+HashConfig config = ...;
 YamlFile yaml = config.getYaml();
 
-String username1 = yaml.getString("users.1.username");
-System.out.println(username1); // Affiche "L1x"
-
-yaml.set("users.1.password", "9101112"); // Définition d'un nouveau mot de passe pour L1x.
-config.save(); // Sauvegarde du fichier de configuration après l'avoir modifié.
-```
-> Nouveau fichier de configuration après l'exécution de ce code:
-```yaml
-users:
-    1:
-        username: L1x
-        password: 9101112
-    2:
-        username: Epitoch
-        password: 5678
+String str = yaml.getString("path.to.your.string");
+int number = yaml.getInt("path.to.your.number");
+double number2 = yaml.getDouble("path.to.your.double");
+// etc...
 ```
 
----
-
-**Accéder aux variables d'environnement:**
+**Modification des valeurs dans le fichier de configuration**
 ```java
-HashConfig config = new HashConfig(this.getClass(), "...", "...", true);
-                                                         /*       ^^^^           */
-                                                         /* Pour charger le .env */
-Dotenv env = config.getEnv();
-String token = env.get("TOKEN");
+HashConfig config = ...;
+YamlFile yaml = config.getYaml();
 
-System.out.println("Token: " + token); // Affiche "YOUR_TOKEN"
+String your_string = "blabla";
+int your_integer = 1234;
+double your_double = 1234.2934;
+
+// Définir les nouvelles valeurs.
+yaml.set("path.to.your.string", your_string);
+yaml.set("path.to.your.integer", your_integer);
+yaml.set("path.to.your.double", your_double);
+
+config.save(); // Sauvegarder les nouvelles valeurs.
 ```
 
----
-
-**Modification manuelle du fichier de configuration / Comment reload ?**
-
-Si vous avez modifié votre fichier de configuration à la main et que vous souhaitez le recharger sans pour autant devoir restart le serveur, vous pouvez utiliser la méthode suivante :
+**Rechargement du fichier de configuration**
 ```java
-HashConfig config = new HashConfig(this.getClass(), ...);
+HashConfig config = ...;
+
+// Vos modifications ici...
+
 config.reload();
 ```
 
 ---
 
-# `⚠️ RAPPEL DES WARNINGS`
-- Le fichier de configuration ne sera pas chargé/recréé depuis les ressources si il existe déjà en local. Il sera uniquement chargé depuis le fichier local.
+> [!warning]
+> ⚠️ RAPPEL DES WARNINGS
+> 
+> Le fichier de configuration ne sera pas chargé/recréé depuis les ressources s'il existe déjà en local.
+> Il sera uniquement chargé depuis le fichier local et non depuis l'archive.
