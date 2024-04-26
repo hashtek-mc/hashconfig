@@ -1,4 +1,4 @@
-# `⚙️ HashConfig v0.0.1 - Guide d'utilisation`
+# ⚙️ HashConfig v0.0.1 - Guide d'utilisation
 
 ## Description de la librairie
 Cette librairie est faîte pour manipuler des fichiers de configuration ainsi que des `.env` plus facilement.
