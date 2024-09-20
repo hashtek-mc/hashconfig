@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'fr.hashtek'
+version = 'R0.0.4-SNAPSHOT'
+
+def hashrc = '/home/shuvly/Hashtek/hashrc'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+dependencies {
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+    implementation 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4'
+}
+
+def targetJavaVersion = 16
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+
+    mergeServiceFiles()
+    minimize()
+}
+
+tasks.register('make', Copy) {
+    from ('build/libs/')
+    into hashrc
+    include '*.jar'
+}
+
+tasks.make.dependsOn shadowJar
